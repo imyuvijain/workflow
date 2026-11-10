@@ -49,6 +49,7 @@ function render() {
   const start = new Date(end.getFullYear(), end.getMonth(), end.getDate() - 6);
   const formatDate = date => date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   $('week-range').textContent = `${formatDate(start)} – ${formatDate(end)}`;
+  $('chart').setAttribute('aria-label', `Daily study hours, ${formatDate(start)} to ${formatDate(end)}`);
   $('next-week').disabled = weekOffset === 0;
   const days = Array.from({ length: 7 }, (_, i) => {
     const date = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
@@ -173,6 +174,11 @@ $('sound-toggle').addEventListener('click', async () => {
     playing = !playing;
     setGain();
     renderSound();
+    if (!playing) {
+      // Let the fade finish, then stop processing audio while paused.
+      await new Promise(resolve => setTimeout(resolve, 180));
+      await context.suspend();
+    }
   } catch {
     playing = false;
     if (context) await context.close().catch(() => {});
