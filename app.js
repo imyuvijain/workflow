@@ -117,12 +117,17 @@ let gain;
 let noise;
 let playing = false;
 let volume = 30;
+const noiseNames = { brown: 'brown', pink: 'pink', white: 'white' };
+let noiseType = 'brown';
 try {
   const stored = localStorage.getItem('quiet.volume');
   if (stored !== null && Number.isFinite(Number(stored))) volume = Math.min(100, Math.max(0, Number(stored)));
+  const storedType = localStorage.getItem('quiet.noiseType');
+  if (Object.hasOwn(noiseNames, storedType)) noiseType = storedType;
 } catch { /* Volume preferences are optional. */ }
 $('volume').value = volume;
 $('volume-value').textContent = `${volume}%`;
+$('noise-type').value = noiseType;
 
 function setGain() {
   if (!context || !gain) return;
@@ -131,7 +136,7 @@ function setGain() {
 
 function renderSound() {
   $('sound-toggle').textContent = playing ? 'Pause' : 'Play';
-  $('sound-toggle').setAttribute('aria-label', playing ? 'Pause brown noise' : 'Play brown noise');
+  $('sound-toggle').setAttribute('aria-label', `${playing ? 'Pause' : 'Play'} ${noiseNames[noiseType]} noise`);
   $('sound-toggle').setAttribute('aria-pressed', String(playing));
   $('sound-note').textContent = playing && volume === 0 ? 'Muted (volume is 0%).' : '';
 }
@@ -144,8 +149,11 @@ $('sound-toggle').addEventListener('click', async () => {
       context = new AudioContext();
       // Resume within the user gesture, before awaiting module loading (Safari).
       await context.resume();
-      await context.audioWorklet.addModule(new URL('./brown-noise.js', import.meta.url));
-      noise = new AudioWorkletNode(context, 'brown-noise', { outputChannelCount: [2] });
+      await context.audioWorklet.addModule(new URL('./noise-processor.js', import.meta.url));
+      noise = new AudioWorkletNode(context, 'workflow-noise', {
+        outputChannelCount: [2],
+        processorOptions: { type: noiseType }
+      });
       const highpass = context.createBiquadFilter();
       highpass.type = 'highpass';
       highpass.frequency.value = 25;
@@ -186,3 +194,12 @@ $('volume').addEventListener('input', event => {
   renderSound();
   try { localStorage.setItem('quiet.volume', String(volume)); } catch { /* Optional preference. */ }
 });
+
+$('noise-type').addEventListener('change', event => {
+  if (!Object.hasOwn(noiseNames, event.target.value)) return;
+  noiseType = event.target.value;
+  noise?.port.postMessage({ type: noiseType });
+  renderSound();
+  try { localStorage.setItem('quiet.noiseType', noiseType); } catch { /* Optional preference. */ }
+});
+renderSound();

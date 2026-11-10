@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#ffffff">
-    <meta name="description" content="A study timer, daily study hours, and brown noise.">
+    <meta name="description" content="A free, minimal study timer with session titles, daily study hours, and brown, pink, and white noise. No account required.">
     <title>Workflow</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="./style.css">
@@ -34,7 +34,15 @@
           <p class="timer-note">Keeps counting until paused, even if you close this tab.</p>
         </section>
         <section class="sound-panel" aria-labelledby="sound-heading">
-          <h2 id="sound-heading">Brown noise</h2>
+          <div class="sound-source">
+            <h2 id="sound-heading">Noise</h2>
+            <label class="sr-only" for="noise-type">Noise type</label>
+            <select id="noise-type">
+              <option value="brown">Brown</option>
+              <option value="pink">Pink</option>
+              <option value="white">White</option>
+            </select>
+          </div>
           <div class="volume-control">
             <label for="volume">Volume</label>
             <input id="volume" type="range" min="0" max="100" value="30">
