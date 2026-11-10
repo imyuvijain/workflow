@@ -37,7 +37,7 @@ No sign-up, ads, or subscriptions. Open it in your browser and start a session.
 
 You can change sounds during playback. Transitions fade between types, and your sound and volume preferences are remembered. Audio starts only when you press Play.
 
-For brown noise, choose a **Template**: Classic preserves the original sound, Deep reduces the higher frequencies, Soft gently rounds them off, and Rolling adds a slow volume swell. Open **Customize** to adjust **Warmth** and **Movement** yourself. These settings are remembered and apply only to brown noise; the main volume stays independent.
+For brown noise, open **Tune** beside the noise selector and choose a **Template**: Classic preserves the original sound, Deep reduces the higher frequencies, Soft gently rounds them off, and Rolling adds a slow volume swell. Adjust **Warmth** and **Movement** in the same compact panel. These settings are remembered and apply only to brown noise; the main volume stays independent.
 
 ## Your data
 

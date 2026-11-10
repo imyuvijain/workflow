@@ -1,4 +1,4 @@
-import { BROWN_PRESETS, normalizeBrownSettings, matchingPreset } from './sound-settings.js';
+import { BROWN_PRESETS, normalizeBrownSettings, matchingPreset } from './sound-settings.js?v=1';
 import { STORAGE_KEY, emptyState, parseState, snapshot, transition, renameSession, dateKey, clockText, durationText } from './timer.js';
 
 const $ = id => document.getElementById(id);
@@ -168,6 +168,7 @@ renderBrownSettings();
 
 function renderSound() {
   $('brown-options').hidden = noiseType !== 'brown';
+  if (noiseType !== 'brown') $('brown-options').open = false;
   $('sound-toggle').textContent = playing ? 'Pause' : 'Play';
   $('sound-toggle').setAttribute('aria-label', `${playing ? 'Pause' : 'Play'} ${noiseNames[noiseType]} noise`);
   $('sound-toggle').setAttribute('aria-pressed', String(playing));
@@ -182,7 +183,7 @@ $('sound-toggle').addEventListener('click', async () => {
       context = new AudioContext();
       // Resume within the user gesture, before awaiting module loading (Safari).
       await context.resume();
-      await context.audioWorklet.addModule(new URL('./noise-processor.js', import.meta.url));
+      await context.audioWorklet.addModule(new URL('./noise-processor.js?v=2', import.meta.url));
       noise = new AudioWorkletNode(context, 'workflow-noise', {
         outputChannelCount: [2],
         processorOptions: { type: noiseType, brownSettings }
@@ -236,3 +237,14 @@ $('noise-type').addEventListener('change', event => {
   try { localStorage.setItem('quiet.noiseType', noiseType); } catch { /* Optional preference. */ }
 });
 renderSound();
+
+// Dismiss the tuning panel without interrupting the timer or the audio.
+document.addEventListener('click', event => {
+  if (!$('brown-options').contains(event.target)) $('brown-options').open = false;
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && $('brown-options').open) {
+    $('brown-options').open = false;
+    $('brown-options').querySelector('summary').focus();
+  }
+});

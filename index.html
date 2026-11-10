@@ -15,8 +15,8 @@
     <meta name="twitter:card" content="summary_large_image">
     <title>Workflow</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="./style.css">
-    <script type="module" src="./app.js"></script>
+    <link rel="stylesheet" href="./style.css?v=2">
+    <script type="module" src="./app.js?v=2"></script>
   </head>
   <body>
     <div class="shell">
@@ -50,6 +50,34 @@
               <option value="pink">Pink</option>
               <option value="white">White</option>
             </select>
+            <details class="sound-customize" id="brown-options">
+              <summary aria-label="Tune brown noise">Tune<span class="disclosure" aria-hidden="true"></span></summary>
+              <div class="sound-settings">
+                <div class="template-row">
+                  <label for="brown-template">Template</label>
+                  <select id="brown-template" aria-describedby="template-description">
+                    <option value="classic">Classic</option>
+                    <option value="deep">Deep</option>
+                    <option value="soft">Soft</option>
+                    <option value="rolling">Rolling</option>
+                    <option value="custom" disabled>Custom</option>
+                  </select>
+                </div>
+                <p class="template-description" id="template-description">The original, steady low rumble.</p>
+                <div class="sound-setting">
+                  <label for="brown-warmth">Warmth</label>
+                  <input id="brown-warmth" type="range" min="0" max="100" value="0" aria-describedby="warmth-description">
+                  <output id="warmth-value" for="brown-warmth">0%</output>
+                  <span class="sr-only" id="warmth-description">More warmth softens the higher frequencies.</span>
+                </div>
+                <div class="sound-setting">
+                  <label for="brown-movement">Movement</label>
+                  <input id="brown-movement" type="range" min="0" max="100" value="0" aria-describedby="movement-description">
+                  <output id="movement-value" for="brown-movement">0%</output>
+                  <span class="sr-only" id="movement-description">Add a slow swell to the volume.</span>
+                </div>
+              </div>
+            </details>
           </div>
           <div class="volume-control">
             <label for="volume">Volume</label>
@@ -57,34 +85,6 @@
             <output id="volume-value" for="volume">30%</output>
           </div>
           <button class="secondary sound-toggle" id="sound-toggle" aria-label="Play brown noise" aria-pressed="false">Play</button>
-          <div class="brown-options" id="brown-options">
-            <div class="template-row">
-              <label for="brown-template">Template</label>
-              <select id="brown-template" aria-describedby="template-description">
-                <option value="classic">Classic</option>
-                <option value="deep">Deep</option>
-                <option value="soft">Soft</option>
-                <option value="rolling">Rolling</option>
-                <option value="custom" disabled>Custom</option>
-              </select>
-              <p id="template-description">The original, steady low rumble.</p>
-            </div>
-            <details class="sound-customize">
-              <summary>Customize</summary>
-              <div class="sound-sliders">
-                <div class="sound-setting">
-                  <div class="setting-label"><label for="brown-warmth">Warmth</label><output id="warmth-value" for="brown-warmth">0%</output></div>
-                  <input id="brown-warmth" type="range" min="0" max="100" value="0" aria-describedby="warmth-description">
-                  <p id="warmth-description">More warmth softens the higher frequencies.</p>
-                </div>
-                <div class="sound-setting">
-                  <div class="setting-label"><label for="brown-movement">Movement</label><output id="movement-value" for="brown-movement">0%</output></div>
-                  <input id="brown-movement" type="range" min="0" max="100" value="0" aria-describedby="movement-description">
-                  <p id="movement-description">Add a slow swell to the volume.</p>
-                </div>
-              </div>
-            </details>
-          </div>
           <p class="sound-note" id="sound-note" role="status"></p>
         </section>
         <section class="history-panel" aria-labelledby="history-heading">
