@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { emptyState, dateKey, parseState, snapshot, transition, clockText } from '../timer.js';
+import { emptyState, dateKey, parseState, snapshot, transition, renameSession, clockText } from '../timer.js';
 
 process.env.TZ = 'America/Toronto';
 const at = value => new Date(value).getTime();
@@ -63,4 +63,33 @@ test('a clock correction cannot subtract recorded time', () => {
 
 test('long sessions do not wrap at 24 hours', () => {
   assert.equal(clockText(25 * 3600000 + 61000), '25:01:01');
+});
+
+test('session title survives running, pausing, a reload, and a resumed session', () => {
+  let state = renameSession(emptyState(), 'MATH135');
+  state = transition(state, 'toggle', 1000);
+  state = parseState(JSON.stringify(state));
+  assert.equal(state.title, 'MATH135');
+  state = transition(state, 'toggle', 61000);
+  state = transition(state, 'toggle', 121000);
+  assert.equal(snapshot(state, 181000).title, 'MATH135');
+  state = transition(state, 'finish', 181000);
+  assert.equal(state.title, '');
+  assert.equal(Object.values(state.totals).reduce((a, b) => a + b, 0), 120000);
+});
+
+test('existing study history without a title is upgraded without losing time', () => {
+  const state = parseState('{"totals":{"2026-11-10":7200000},"sessionMs":60000,"startedAt":null}');
+  assert.equal(state.title, '');
+  assert.equal(state.totals['2026-11-10'], 7200000);
+  assert.equal(state.sessionMs, 60000);
+});
+
+test('renaming a running session preserves its original start time and daily totals', () => {
+  const running = transition(emptyState(), 'toggle', 1000);
+  const renamed = renameSession(running, 'MATH135');
+  assert.equal(renamed.startedAt, 1000);
+  assert.equal(renamed.sessionMs, 0);
+  assert.deepEqual(renamed.totals, {});
+  assert.equal(snapshot(renamed, 61000).sessionMs, 60000);
 });

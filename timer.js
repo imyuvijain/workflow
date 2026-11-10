@@ -1,6 +1,6 @@
 // Store timestamps instead of counting interval ticks: background tabs may throttle them.
 export const STORAGE_KEY = 'quiet.study.v1';
-export const emptyState = () => ({ totals: {}, sessionMs: 0, startedAt: null });
+export const emptyState = () => ({ totals: {}, sessionMs: 0, startedAt: null, title: '' });
 
 export function dateKey(value) {
   const date = new Date(value);
@@ -20,7 +20,12 @@ export function parseState(raw) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(key) || !Number.isFinite(value) || value < 0) throw new Error('Invalid saved total');
     totals[key] = value;
   }
-  return { totals, sessionMs: state.sessionMs, startedAt: state.startedAt };
+  if (state.title !== undefined && typeof state.title !== 'string') throw new Error('Invalid session title');
+  return { totals, sessionMs: state.sessionMs, startedAt: state.startedAt, title: (state.title || '').slice(0, 80) };
+}
+
+export function renameSession(state, title) {
+  return { ...state, title: title.slice(0, 80) };
 }
 
 // Split a running session at local midnights, including 23/25-hour DST days.
@@ -48,6 +53,7 @@ export function transition(state, action, now = Date.now()) {
   else if (action === 'finish') {
     next.startedAt = null;
     next.sessionMs = 0;
+    next.title = '';
   } else throw new Error('Unknown timer action');
   return next;
 }

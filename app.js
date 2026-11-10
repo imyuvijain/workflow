@@ -1,4 +1,4 @@
-import { STORAGE_KEY, emptyState, parseState, snapshot, transition, dateKey, clockText, durationText } from './timer.js';
+import { STORAGE_KEY, emptyState, parseState, snapshot, transition, renameSession, dateKey, clockText, durationText } from './timer.js';
 
 const $ = id => document.getElementById(id);
 let state = emptyState();
@@ -36,10 +36,11 @@ function render() {
   const running = state.startedAt !== null;
   const time = clockText(current.sessionMs);
   $('timer').innerHTML = `${time.slice(0, -3)}<span>${time.slice(-3)}</span>`;
-  $('timer-toggle').innerHTML = running ? '<span aria-hidden="true">Ⅱ</span> Pause studying' : '<span aria-hidden="true">▶</span> ' + (current.sessionMs ? 'Resume studying' : 'Start studying');
-  $('timer-status').innerHTML = `<i></i> ${running ? 'Time to focus' : current.sessionMs ? 'Taking a breather' : 'Ready when you are'}`;
+  $('timer-toggle').textContent = running ? 'Pause' : current.sessionMs ? 'Resume' : 'Start';
+  $('timer-status').textContent = running ? 'Running' : current.sessionMs ? 'Paused' : 'Idle';
   $('timer-status').classList.toggle('running', running);
-  $('timer-hint').textContent = running ? 'You’re here. That’s a good start.' : current.sessionMs ? 'Take your time. Come back when you’re ready.' : 'A fresh start. Make it yours.';
+  $('session-title').disabled = savedUnreadable;
+  if (document.activeElement !== $('session-title')) $('session-title').value = state.title;
   $('timer-finish').disabled = savedUnreadable || (!running && current.sessionMs === 0);
   $('date').textContent = now.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
   const today = dateKey(now);
@@ -80,12 +81,12 @@ function render() {
   $('daily-totals').replaceChildren(rows);
 }
 
-async function changeTimer(action) {
+async function changeTimer(action, title) {
   if (savedUnreadable) return;
   const change = () => {
     if (storageHealthy) state = readState();
     if (savedUnreadable) return;
-    state = transition(state, action);
+    state = action === 'title' ? renameSession(state, title) : transition(state, action);
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
     catch {
       storageHealthy = false;
@@ -100,6 +101,8 @@ async function changeTimer(action) {
 
 $('timer-toggle').addEventListener('click', () => changeTimer('toggle'));
 $('timer-finish').addEventListener('click', () => changeTimer('finish'));
+$('session-title').addEventListener('input', event => changeTimer('title', event.target.value));
+$('session-title').addEventListener('blur', render);
 $('previous-week').addEventListener('click', () => { weekOffset--; render(); });
 $('next-week').addEventListener('click', () => { weekOffset = Math.min(0, weekOffset + 1); render(); });
 window.addEventListener('storage', event => {
@@ -108,19 +111,6 @@ window.addEventListener('storage', event => {
 document.addEventListener('visibilitychange', () => { if (!document.hidden) render(); });
 setInterval(render, 1000);
 render();
-
-// A small contour illustration, drawn locally with no image assets or tracking.
-for (let line = 0; line < 10; line++) {
-  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  let d = '';
-  for (let x = 0; x <= 320; x += 2) {
-    const envelope = Math.sin(Math.PI * x / 320);
-    const y = 16 + line * 8 + Math.sin(x / 35 + line * 0.36) * 12 * envelope + Math.sin(x / 18 + line * 0.18) * 4 * envelope;
-    d += `${x === 0 ? 'M' : 'L'}${x},${y.toFixed(2)} `;
-  }
-  path.setAttribute('d', d);
-  $('sound-lines').append(path);
-}
 
 let context;
 let gain;
@@ -140,11 +130,10 @@ function setGain() {
 }
 
 function renderSound() {
-  $('sound-toggle').innerHTML = `<span aria-hidden="true">${playing ? 'Ⅱ' : '▶'}</span>`;
+  $('sound-toggle').textContent = playing ? 'Pause' : 'Play';
   $('sound-toggle').setAttribute('aria-label', playing ? 'Pause brown noise' : 'Play brown noise');
   $('sound-toggle').setAttribute('aria-pressed', String(playing));
-  document.querySelector('.sound-panel').classList.toggle('playing', playing);
-  $('sound-note').textContent = playing ? (volume === 0 ? 'Playing at zero volume. Turn it up when you’re ready.' : 'A little quiet, whenever you need it.') : 'Press play to find your focus.';
+  $('sound-note').textContent = playing && volume === 0 ? 'Muted (volume is 0%).' : '';
 }
 
 $('sound-toggle').addEventListener('click', async () => {
