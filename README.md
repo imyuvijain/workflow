@@ -1,35 +1,86 @@
 # Workflow
 
-A study timer, daily study hours, and continuous brown noise with volume control. Static HTML, CSS, and JavaScript. No runtime dependencies or backend.
+A minimal study timer with background noise and daily study hours.
 
-## Use
+**[Open Workflow →](https://workflow.yuvijain.com)** · [Report a bug](https://github.com/imyuvijain/workflow/issues) · [Suggest a feature](https://github.com/imyuvijain/workflow/issues)
 
-- Enter a **session title**, such as MATH135. It stays with the current session across pauses and reloads. You can edit it while studying; **Finish** clears it for the next session.
-- **Start** begins the stopwatch. **Pause** excludes breaks. **Finish** saves the time and clears the session stopwatch.
-- Daily totals are shown in hours, with a seven-day chart and previous/next history controls. Sessions crossing midnight are split by local calendar day.
-- A running timer continues until paused or finished, even across reloads or closed tabs. Pause it when you leave.
-- Study history is stored in this browser's local storage. It does not sync between devices, browser profiles, or different website addresses. Clearing site data removes the history.
-- Brown noise starts only when you press play. It is generated continuously using an AudioWorklet. Its volume preference is saved; audio never autoplays after a reload. Use a current browser over HTTPS or localhost.
-- The interface uses system fonts and a neutral black-and-white palette. There are no external font requests.
+No sign-up, ads, or subscriptions. Open it in your browser and start a session.
 
-## Local development
+[![Workflow showing a MATH135 study session, noise controls, and daily study hours](docs/screenshot.png)](https://workflow.yuvijain.com)
 
-Requires Node.js 20+ for checks/build and Python 3 for the optional development server.
+*Screenshot shows an example session with demo study data.*
+
+## What it does
+
+- **Name your session.** Type a course, project, or task, such as `MATH135`. The title stays with the timer across pauses and reloads.
+- **Track your time.** Start, pause, resume, and finish sessions. Daily totals are split at local midnight, including overnight sessions.
+- **See your study hours.** Check today's total and browse earlier days in the seven-day chart.
+- **Choose your background noise.** Switch between brown, pink, and white noise, with one volume control. Sound is generated on your device, with no audio downloads or repeating tracks.
+- **Keep it simple.** A responsive black-and-white interface with system fonts and keyboard-accessible controls.
+
+## Start a session
+
+1. Open **[workflow.yuvijain.com](https://workflow.yuvijain.com)**.
+2. Enter a session title if you want one, then click **Start**.
+3. Pick a noise type and press **Play**. Audio and the timer work independently.
+4. Use **Pause** for a break. **Finish** clears the session title and timer; your daily study hours remain saved.
+
+**A running timer keeps counting until you pause or finish it, even if you close the tab.** Pause it when you stop working.
+
+### Noise types
+
+| Sound | Character |
+| --- | --- |
+| Brown | Deep, low rumble |
+| Pink | Softer hiss with more low frequencies than white noise |
+| White | Bright, steady hiss |
+
+You can change sounds during playback. Transitions fade between types, and your sound and volume preferences are remembered. Audio starts only when you press Play.
+
+## Your data
+
+Session titles, timer state, study totals, and sound preferences are stored in your browser's local storage. Workflow has no accounts, analytics, or database.
+
+- Data does **not** sync between devices, browsers, or website addresses.
+- Clearing the site's browser data removes your study history.
+- Private browsing may discard history when the browser session ends.
+
+## Run it locally
+
+No dependency installation is needed. With Git and Python 3:
+
+```sh
+git clone https://github.com/imyuvijain/workflow.git
+cd workflow
+python3 -m http.server 4173 --bind 127.0.0.1
+```
+
+Open **http://127.0.0.1:4173** in a current browser. Use localhost or HTTPS so the audio worklet can run.
+
+For development checks, use Node.js 20 or newer:
 
 ```sh
 npm test
 npm run build
-npm run dev
 ```
 
-Open http://127.0.0.1:4173. No installation step is needed.
+Tests cover timer persistence, session titles, pauses, overnight sessions, daylight saving changes, and the frequency balance and transitions of all three noise types. The optional build exports the public assets to `dist/`.
 
-## GitHub Pages
+## Host your own copy
 
-The live site is https://imyuvijain.github.io/workflow/. GitHub Pages publishes the root of `main` after each update. No build step is required for hosting; `.nojekyll` serves the files directly. The optional `npm run build` command creates a separate `dist/` containing only public assets.
+Workflow is a static website: HTML, CSS, and JavaScript, with no backend or runtime dependencies.
 
-For another repository, choose **Settings → Pages → Deploy from a branch → main → / (root)**. All asset paths are relative, so the site works under a repository subpath.
+For GitHub Pages:
 
-## Checks
+1. Fork the repository.
+2. Delete `CNAME`, or replace its contents with your own custom domain.
+3. In your fork, select **Settings → Pages → Deploy from a branch → main → / (root)**.
+4. Open the URL shown by GitHub after deployment.
 
-`npm test` covers session titles, pausing and finishing, reload persistence, local midnight splits, daylight saving changes, malformed data, sessions longer than 24 hours, and the brown noise signal. Live browser/audio checks require a preview server and are separate from these tests.
+Relative asset paths support repository subpaths. You can also serve the exported `dist/` folder with any static host. The export retains `CNAME` when that file exists.
+
+## Contributing
+
+Issues and pull requests are welcome. For bugs, include your browser, what you did, and what you expected. For feature ideas, explain the study workflow they would help with.
+
+The interface intentionally stays small: a timer, background noise, and study history.
