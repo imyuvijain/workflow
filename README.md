@@ -1,4 +1,4 @@
-# Quiet
+# Workflow
 
 A small personal study workspace: a stopwatch, daily study hours, and continuous brown noise with volume control. Static HTML, CSS, and JavaScript. No runtime dependencies or backend.
 
