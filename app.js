@@ -1,3 +1,4 @@
+import { BROWN_PRESETS, normalizeBrownSettings, matchingPreset } from './sound-settings.js';
 import { STORAGE_KEY, emptyState, parseState, snapshot, transition, renameSession, dateKey, clockText, durationText } from './timer.js';
 
 const $ = id => document.getElementById(id);
@@ -119,12 +120,15 @@ let playing = false;
 let volume = 30;
 const noiseNames = { brown: 'brown', pink: 'pink', white: 'white' };
 let noiseType = 'brown';
+let brownSettings = normalizeBrownSettings();
 try {
   const stored = localStorage.getItem('quiet.volume');
   if (stored !== null && Number.isFinite(Number(stored))) volume = Math.min(100, Math.max(0, Number(stored)));
   const storedType = localStorage.getItem('quiet.noiseType');
   if (Object.hasOwn(noiseNames, storedType)) noiseType = storedType;
-} catch { /* Volume preferences are optional. */ }
+} catch { /* Sound preferences are optional. */ }
+try { brownSettings = normalizeBrownSettings(JSON.parse(localStorage.getItem('quiet.brownSettings'))); }
+catch { /* Missing or unreadable settings use Classic. */ }
 $('volume').value = volume;
 $('volume-value').textContent = `${volume}%`;
 $('noise-type').value = noiseType;
@@ -134,7 +138,36 @@ function setGain() {
   gain.gain.setTargetAtTime(playing ? (volume / 100) ** 1.5 * 0.8 : 0, context.currentTime, 0.04);
 }
 
+function renderBrownSettings() {
+  const preset = matchingPreset(brownSettings);
+  $('brown-template').value = preset;
+  $('template-description').textContent = BROWN_PRESETS[preset]?.description || 'Your own warmth and movement settings.';
+  for (const setting of ['warmth', 'movement']) {
+    $('brown-' + setting).value = brownSettings[setting];
+    $(setting + '-value').textContent = `${brownSettings[setting]}%`;
+  }
+}
+
+function updateBrownSettings(settings) {
+  brownSettings = normalizeBrownSettings(settings);
+  noise?.port.postMessage({ brownSettings });
+  renderBrownSettings();
+  try { localStorage.setItem('quiet.brownSettings', JSON.stringify(brownSettings)); } catch { /* Optional preference. */ }
+}
+
+$('brown-template').addEventListener('change', event => {
+  const preset = BROWN_PRESETS[event.target.value];
+  if (preset) updateBrownSettings(preset);
+});
+for (const setting of ['warmth', 'movement']) {
+  $('brown-' + setting).addEventListener('input', event => {
+    updateBrownSettings({ ...brownSettings, [setting]: Number(event.target.value) });
+  });
+}
+renderBrownSettings();
+
 function renderSound() {
+  $('brown-options').hidden = noiseType !== 'brown';
   $('sound-toggle').textContent = playing ? 'Pause' : 'Play';
   $('sound-toggle').setAttribute('aria-label', `${playing ? 'Pause' : 'Play'} ${noiseNames[noiseType]} noise`);
   $('sound-toggle').setAttribute('aria-pressed', String(playing));
@@ -152,7 +185,7 @@ $('sound-toggle').addEventListener('click', async () => {
       await context.audioWorklet.addModule(new URL('./noise-processor.js', import.meta.url));
       noise = new AudioWorkletNode(context, 'workflow-noise', {
         outputChannelCount: [2],
-        processorOptions: { type: noiseType }
+        processorOptions: { type: noiseType, brownSettings }
       });
       const highpass = context.createBiquadFilter();
       highpass.type = 'highpass';

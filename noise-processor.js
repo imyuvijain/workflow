@@ -7,6 +7,14 @@ class NoiseProcessor extends AudioWorkletProcessor {
     this.mix = this.types.map(type => Number(type === this.type));
     this.fade = 1 - Math.exp(-1 / (sampleRate * 0.025));
     this.brown = 0;
+    this.brownLow = 0;
+    this.phase = 0;
+    this.warmth = 0;
+    this.movement = 0;
+    this.setBrownSettings(options.processorOptions?.brownSettings);
+    this.warmth = this.targetWarmth;
+    this.movement = this.targetMovement;
+    this.lowpass = this.targetLowpass;
 
     // Voss–McCartney pink noise: random sources updated at octave intervals,
     // plus a full-rate white source to fill the highest octave.
@@ -15,7 +23,17 @@ class NoiseProcessor extends AudioWorkletProcessor {
     this.counter = 0;
     this.port.onmessage = ({ data }) => {
       if (this.types.includes(data?.type)) this.type = data.type;
+      if (data?.brownSettings) this.setBrownSettings(data.brownSettings);
     };
+  }
+
+  setBrownSettings(settings) {
+    const percent = value => typeof value === 'number' && Number.isFinite(value) ? Math.min(100, Math.max(0, value)) / 100 : 0;
+    this.targetWarmth = percent(settings?.warmth);
+    this.targetMovement = percent(settings?.movement);
+    // A progressively lower cutoff rounds off the brown noise's upper edge.
+    const cutoff = Math.min(sampleRate * 0.45, 16000 * (70 / 16000) ** this.targetWarmth);
+    this.targetLowpass = 1 - Math.exp(-2 * Math.PI * cutoff / sampleRate);
   }
 
   process(inputs, outputs) {
@@ -35,7 +53,14 @@ class NoiseProcessor extends AudioWorkletProcessor {
       for (let type = 0; type < this.types.length; type++) {
         this.mix[type] += (Number(this.types[type] === this.type) - this.mix[type]) * this.fade;
       }
-      samples[i] = this.brown * 3.5 * this.mix[0]
+      this.warmth += (this.targetWarmth - this.warmth) * this.fade;
+      this.movement += (this.targetMovement - this.movement) * this.fade;
+      this.lowpass += (this.targetLowpass - this.lowpass) * this.fade;
+      this.brownLow += this.lowpass * (this.brown - this.brownLow);
+      this.phase = (this.phase + 2 * Math.PI / (sampleRate * 12)) % (2 * Math.PI);
+      const swell = 1 - this.movement * 0.22 * (1 - Math.sin(this.phase));
+      const brown = (this.brown * (1 - this.warmth) + this.brownLow * this.warmth) * swell;
+      samples[i] = brown * 3.5 * this.mix[0]
         + (this.pinkSum + white) * 0.085 * this.mix[1]
         + white * 0.35 * this.mix[2];
     }

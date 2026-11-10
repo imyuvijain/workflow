@@ -15,8 +15,8 @@ No sign-up, ads, or subscriptions. Open it in your browser and start a session.
 - **Name your session.** Type a course, project, or task, such as `MATH135`. The title stays with the timer across pauses and reloads.
 - **Track your time.** Start, pause, resume, and finish sessions. Daily totals are split at local midnight, including overnight sessions.
 - **See your study hours.** Check today's total and browse earlier days in the seven-day chart.
-- **Choose your background noise.** Switch between brown, pink, and white noise, with one volume control. Sound is generated on your device, with no audio downloads or repeating tracks.
-- **Keep it simple.** A responsive black-and-white interface with system fonts and keyboard-accessible controls.
+- **Choose your background noise.** Switch between brown, pink, and white noise, with one volume control. Brown noise includes Classic, Deep, Soft, and Rolling templates, plus optional warmth and movement controls. Sound is generated on your device, with no audio downloads or repeating tracks.
+- **Keep it simple.** A responsive monochrome interface with system fonts and keyboard-accessible controls. Light and dark mode follow your system settings automatically.
 
 ## Start a session
 
@@ -36,6 +36,8 @@ No sign-up, ads, or subscriptions. Open it in your browser and start a session.
 | White | Bright, steady hiss |
 
 You can change sounds during playback. Transitions fade between types, and your sound and volume preferences are remembered. Audio starts only when you press Play.
+
+For brown noise, choose a **Template**: Classic preserves the original sound, Deep reduces the higher frequencies, Soft gently rounds them off, and Rolling adds a slow volume swell. Open **Customize** to adjust **Warmth** and **Movement** yourself. These settings are remembered and apply only to brown noise; the main volume stays independent.
 
 ## Your data
 
@@ -64,7 +66,7 @@ npm test
 npm run build
 ```
 
-Tests cover timer persistence, session titles, pauses, overnight sessions, daylight saving changes, and the frequency balance and transitions of all three noise types. The optional build exports the public assets to `dist/`.
+Tests cover timer persistence, session titles, pauses, overnight sessions, daylight saving changes, the frequency balance and transitions of all three noise types, and brown-noise templates and customization. The optional build exports the public assets to `dist/`.
 
 ## Host your own copy
 

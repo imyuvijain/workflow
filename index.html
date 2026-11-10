@@ -3,7 +3,9 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#ffffff">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#171717" media="(prefers-color-scheme: dark)">
     <meta name="description" content="A free, minimal study timer with session titles, daily study hours, and brown, pink, and white noise. No account required.">
     <meta property="og:title" content="Workflow">
     <meta property="og:description" content="A minimal study timer with background noise and daily study hours. No account required.">
@@ -55,6 +57,34 @@
             <output id="volume-value" for="volume">30%</output>
           </div>
           <button class="secondary sound-toggle" id="sound-toggle" aria-label="Play brown noise" aria-pressed="false">Play</button>
+          <div class="brown-options" id="brown-options">
+            <div class="template-row">
+              <label for="brown-template">Template</label>
+              <select id="brown-template" aria-describedby="template-description">
+                <option value="classic">Classic</option>
+                <option value="deep">Deep</option>
+                <option value="soft">Soft</option>
+                <option value="rolling">Rolling</option>
+                <option value="custom" disabled>Custom</option>
+              </select>
+              <p id="template-description">The original, steady low rumble.</p>
+            </div>
+            <details class="sound-customize">
+              <summary>Customize</summary>
+              <div class="sound-sliders">
+                <div class="sound-setting">
+                  <div class="setting-label"><label for="brown-warmth">Warmth</label><output id="warmth-value" for="brown-warmth">0%</output></div>
+                  <input id="brown-warmth" type="range" min="0" max="100" value="0" aria-describedby="warmth-description">
+                  <p id="warmth-description">More warmth softens the higher frequencies.</p>
+                </div>
+                <div class="sound-setting">
+                  <div class="setting-label"><label for="brown-movement">Movement</label><output id="movement-value" for="brown-movement">0%</output></div>
+                  <input id="brown-movement" type="range" min="0" max="100" value="0" aria-describedby="movement-description">
+                  <p id="movement-description">Add a slow swell to the volume.</p>
+                </div>
+              </div>
+            </details>
+          </div>
           <p class="sound-note" id="sound-note" role="status"></p>
         </section>
         <section class="history-panel" aria-labelledby="history-heading">
